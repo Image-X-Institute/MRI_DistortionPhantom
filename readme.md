@@ -6,14 +6,15 @@ This repository contains code to generate a customized MRI Distortion Phantom in
 
 Compared to other MRI distortion phantoms, this work is:
 
-- Free and open source design files
+- Free and open source design
 - Completely user customizable  
-- No water: light weight and leak free
+- Water free: light weight and leak free
 - Designed for cheap and easy construction
 
 
 
-![](C:\Users\Brendan\Documents\temp\MRI_DistortionPhantom\docsrc\_resources\PhantomAnimation.gif)
+![](docsrc/_resources/PhantomAnimation.gif)
+
 
 ## Setup/Build/Install
 
