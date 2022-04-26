@@ -13,7 +13,8 @@ Compared to other MRI distortion phantoms, this work is:
 
 
 
-![](../docsrc/_resources/PhantomAnimation.gif)
+![](docsrc/_resources/PhantomAnimation.gif)
+
 
 ## Setup/Build/Install
 
