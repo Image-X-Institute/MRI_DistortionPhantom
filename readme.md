@@ -23,7 +23,7 @@ Compared to other MRI distortion phantoms, this work is:
 
 ## Usage
 
-- To generate your first phantom design, please see
+- To generate your first phantom design, please see the [getting started](https://acrf-image-x-institute.github.io/MRI_DistortionPhantom/GettingStarted.html) page in the docs
 - Important note: This code is <u>only</u> designed to worked from within FreeCAD. Any attempts to execute it from outside FreeCAD will fail.
 
 ## Directory Structure
