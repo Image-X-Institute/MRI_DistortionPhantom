@@ -229,7 +229,7 @@ class AddPhantomSlice:
         Page = doc.addObject('TechDraw::DrawPage', 'RealScaleDrawing')
         doc.addObject('TechDraw::DrawSVGTemplate', 'Template')
         this_directory = Path(__file__).parent
-        doc.Template.Template = str(this_directory / "../__resources/A2_Landscape_blank.svg")
+        doc.Template.Template = str(this_directory / "docsrc/_resources/A2_Landscape_blank.svg")
         Page.Template = doc.Template
 
         View = doc.addObject('TechDraw::DrawViewPart', 'View')
