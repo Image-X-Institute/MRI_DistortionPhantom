@@ -19,6 +19,7 @@ Compared to existing distortion phantoms, this phantom has the following points 
    :maxdepth: 2
    :caption: Contents:
 
+   /GettingStarted.md
    /phantom_customisation.md
    /phantom_construction.md
    /phantom_imaging.md

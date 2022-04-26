@@ -22,10 +22,7 @@ Compared to other MRI distortion phantoms, this work is:
 
 ## Usage
 
-- For detailed instructions on setting up FreeCAD see HERE.
-- From FreeCAD, open the Macro menu and execute FoamPrototypeExample as a macro. 
-- All geometric parameters can be altered to your hearts content; detailed instructions on customization are provided here.
-- Manufacturing tips are provided HERE.
+- To generate your first phantom design, please see
 - Important note: This code is <u>only</u> designed to worked from within FreeCAD. Any attempts to execute it from outside FreeCAD will fail.
 
 ## Directory Structure
