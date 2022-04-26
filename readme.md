@@ -4,9 +4,9 @@
 
 This repository contains code to generate a customized MRI Distortion Phantom in [FreeCAD](https://www.freecadweb.org/). We also provide a 'how to' on manufacturing and imaging such a phantom.
 
-Compared to other MRI distortion phantoms, this work is:
+Compared to other MRI distortion phantoms, this is:
 
-- Free and open source design
+- Free and open source
 - Completely user customizable  
 - Water free: light weight and leak free
 - Designed for cheap and easy construction

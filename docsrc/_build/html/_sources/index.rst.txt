@@ -8,12 +8,18 @@ MRI_DistortionPhantom
 
 The purpose of `this repository <https://github.com/ACRF-Image-X-Institute/MRI_DistortionPhantom>`_ is to provide code such that users can automatically build a simple and cheap MRI distortion phantom.
 
-Compared to existing distortion phantoms, this phantom has the following points of difference:
+Compared to other MRI distortion phantoms, this is:
 
-- Open source design
-- Completely user customizable  
-- No water: light weight and leak free
-- Cheap and simple construction
+- Free and open source
+- Completely user customizable
+- Water free: light weight and leak free
+- Designed for cheap and easy construction
+
+.. figure:: _resources/PhantomAnimation.gif
+    :align: center
+    :alt: FreeCAD setup
+	:scale: 100%
+    :figclass: align-center
 
 .. toctree::
    :maxdepth: 2
