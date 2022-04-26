@@ -4,6 +4,17 @@
 
 This repository contains code to generate a customized MRI Distortion Phantom in [FreeCAD](https://www.freecadweb.org/). We also provide a 'how to' on manufacturing and imaging such a phantom.
 
+Compared to other MRI distortion phantoms, this work is:
+
+- Free and open source design files
+- Completely user customizable  
+- No water: light weight and leak free
+- Designed for cheap and easy construction
+
+
+
+![](C:\Users\Brendan\Documents\temp\MRI_DistortionPhantom\docsrc\_resources\PhantomAnimation.gif)
+
 ## Setup/Build/Install
 
 - Download and install [FreeCAD](https://www.freecadweb.org/). This work was tested with FreeCAD V0.19. The scripts will be executed within the FreeCAD python environment, so you don't need any additional libraries.

@@ -40,7 +40,15 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="phantom_customisation.html">Phantom Customization</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Phantom Construction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Phantom Construction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-geometry-for-manufacture">Specifying geometry for manufacture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#markers">Markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background-material">Background material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#before-your-first-prototype-general-tips">Before your first prototype: general tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#first-prototype-drill-press">First prototype: Drill press</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#second-protoype-laser-cut-foam">Second protoype: Laser cut foam</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="phantom_imaging.html">Phantom Imaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_docs.html">Code documentation</a></li>
 </ul>
@@ -71,6 +79,51 @@
              
   <section id="phantom-construction">
 <h1>Phantom Construction<a class="headerlink" href="#phantom-construction" title="Permalink to this headline"></a></h1>
+<p>To a first order, the intention of this repository is to enable users to generate a CAD model of a distortion phantom; exactly how to construct it and what to construct it from is somewhat up to the user!</p>
+<p>With that said, here are some notes about how we have gone about this previously.</p>
+<section id="specifying-geometry-for-manufacture">
+<h2>Specifying geometry for manufacture<a class="headerlink" href="#specifying-geometry-for-manufacture" title="Permalink to this headline"></a></h2>
+<p>When you build your phantom, each “Slice” object has a method called <code class="docutils literal notranslate"><span class="pre">add_full_scale_drawing</span></code>. This does exactly what it sounds like: adds a 1:1 scale drawing of that slice into the FreeCAD object tree. To add a drawing of a slice, the code looks like the below.</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">Slice</span> <span class="o">=</span> <span class="n">PhantomBuilder</span><span class="o">.</span><span class="n">AddPhantomSlice</span><span class="p">()</span>
+<span class="n">Slice</span><span class="o">.</span><span class="n">add_full_scale_drawing</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In the FoamPrototypeExample we provide, you would have to add the add_full_scale_drawing() call to eace slice in the for loop.</p>
+<p>To export each drawing, simply select it, click file, export, then export as pdf.</p>
+<p>From here, you can either print out each pdf if you intend to construct a phantom manually, or send this directly to the manufacturer. In our experience, this pdf drawing along with a phone call were all manufacturers needed.</p>
+<p><img alt="_images/full_scale_drawing1.PNG" src="_images/full_scale_drawing1.PNG" /></p>
+<p><strong>Figure: using the full_scale_drawing</strong> adds multiple drawings into the Model tree. Each of these must be manually exported (for now. we will add an auto method in future)</p>
+<p><img alt="_images/TechDraw_prefs.PNG" src="_images/TechDraw_prefs.PNG" /></p>
+<p><strong>Figure: we suggest enabling the ‘Print Center Marks’ option, which doesn’t show up in FreeCAD but will print a crosshair in each circle when you export to pdf. This is especially important if you intend to manually drill the holes</strong></p>
+</section>
+<section id="markers">
+<h2>Markers<a class="headerlink" href="#markers" title="Permalink to this headline"></a></h2>
+<p>The phantom has a number of holes to put markers in, but what should you actually use for markers? We have had a lot of success using fish oil capsules such as <a class="reference external" href="https://www.blackmores.com.au/products/fish-oil-1000">these</a>. Note that the use of oil has ramifications for MRI imaging; we discuss these and provide suggestions on how to take images safely <a class="reference external" href="#">ADD LINK</a></p>
+</section>
+<section id="background-material">
+<h2>Background material<a class="headerlink" href="#background-material" title="Permalink to this headline"></a></h2>
+<p>The slice could be constructed of anything MRI neutral. We have constructed phantoms from <a class="reference external" href="https://dctech.com.au/products/styrofoam-rtm-x/">blue foam</a> and <a class="reference external" href="https://www.evolutiongear.com.au/custom-foam-cutting/">add type of foam</a>. If you can find a robust way to manufacture it, foam is an excellent choice as it is super lightweight and storng. However, as described below it can be difficult to manufacture. Alternatively you could use a lightweight plastic but note that even ‘light’ plastic tends to get quite heavy!</p>
+</section>
+<section id="before-your-first-prototype-general-tips">
+<h2>Before your first prototype: general tips<a class="headerlink" href="#before-your-first-prototype-general-tips" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Getting the holes the right size for the markers can involve some trial and error. It’s a good idea to build a few single slice prototypes before continuing to a full design.</p></li>
+</ul>
+</section>
+<section id="first-prototype-drill-press">
+<h2>First prototype: Drill press<a class="headerlink" href="#first-prototype-drill-press" title="Permalink to this headline"></a></h2>
+<p>For our first phantom, we used a drill press on  <a class="reference external" href="https://dctech.com.au/products/styrofoam-rtm-x/">blue foam</a>. An image of this is below. This was quite sucessful, but rather painful to construct a phantom with many holes drilled. There are also obvious limitations to the accuracy of hole placement. We also found that unless you have a high quality drill press, the foam is quite prone to crumbling.</p>
+<p><img alt="_images/FirstPrototype.png" src="_images/FirstPrototype.png" /></p>
+<p><strong>Figure: Action shot of our first slice prototype in action!</strong></p>
+<p><img alt="_images/FirstPrototypeProper.png" src="_images/FirstPrototypeProper.png" /></p>
+<p><strong>Figure: all slices from a drill press based phantom</strong></p>
+</section>
+<section id="second-protoype-laser-cut-foam">
+<h2>Second protoype: Laser cut foam<a class="headerlink" href="#second-protoype-laser-cut-foam" title="Permalink to this headline"></a></h2>
+<p>The drill press version was excellent for development, but long term we wanted something more accurate and less labor intensive. For our second prototype, we utilized laser cut foam. There are many vendors capable of this manufacturing technique; we worked with <a class="reference external" href="https://www.evolutiongear.com.au/custom-foam-cutting/">evolution gear</a>.</p>
+<p><img alt="_images/LaserCutSlice.PNG" src="_images/LaserCutSlice.PNG" /></p>
+<p><strong>Figure: slice from a laser cut foam provider</strong></p>
+</section>
 </section>
 
 

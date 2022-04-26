@@ -38,8 +38,9 @@ for i, z_pos in enumerate(SliceZPositions):
                                            ReferenceCrosshairRadius=referenceRadius,
                                            GuideRods={'radius': 5, 'position': 30, 'height': 370},
                                            HoleCentroids='ROI_polar')
+    # Slice.add_full_scale_drawing()
 
-    Slice.add_full_scale_drawing()
+
 
 Slice.draw_DSV()
 Slice.draw_Load()

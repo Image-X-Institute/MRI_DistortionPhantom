@@ -4,10 +4,16 @@
    contain the root `toctree` directive.
 
 MRI_DistortionPhantom
-===============================
+=====================
 
+The purpose of `this repository <https://github.com/ACRF-Image-X-Institute/MRI_DistortionPhantom>`_ is to provide code such that users can automatically build a simple and cheap MRI distortion phantom.
 
-The quickest way to get started is to go through the worked examples.
+Compared to existing distortion phantoms, this phantom has the following points of difference:
+
+- Open source design
+- Completely user customizable  
+- No water: light weight and leak free
+- Cheap and simple construction
 
 .. toctree::
    :maxdepth: 2
