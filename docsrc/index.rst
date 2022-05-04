@@ -6,7 +6,7 @@
 MRI_DistortionPhantom
 =====================
 
-Geometric distortion in Magnetic Resonance Imaging (MRI) iS a serious problem. The purpose of `this repository <https://github.com/ACRF-Image-X-Institute/MRI_DistortionPhantom>`_ is to provide code such that users can automatically build a simple and cheap MRI distortion phantom to characterise MRI distortion.
+Geometric distortion in Magnetic Resonance Imaging (MRI) is a serious problem. The purpose of `this repository <https://github.com/ACRF-Image-X-Institute/MRI_DistortionPhantom>`_ is to provide code such that users can automatically build a simple and cheap MRI distortion phantom to characterise MRI distortion.
 
 
 Compared to other MRI distortion phantoms, this is:

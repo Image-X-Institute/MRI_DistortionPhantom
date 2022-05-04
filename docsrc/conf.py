@@ -35,7 +35,8 @@ extensions = [
 'sphinx.ext.napoleon',
 'sphinx.ext.todo',
 'recommonmark',
-'sphinx_markdown_tables']
+'sphinx_markdown_tables',
+'sphinx.ext.mathjax']
 
 source_suffix = {
     '.rst': 'restructuredtext',
