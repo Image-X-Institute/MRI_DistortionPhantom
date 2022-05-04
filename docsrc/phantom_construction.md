@@ -35,6 +35,10 @@ The phantom has a number of holes to put markers in, but what should you actuall
 
 The slice could be constructed of anything MRI neutral. We have constructed phantoms from [blue foam](https://dctech.com.au/products/styrofoam-rtm-x/) and [add type of foam](https://www.evolutiongear.com.au/custom-foam-cutting/). If you can find a robust way to manufacture it, foam is an excellent choice as it is super lightweight and storng. However, as described below it can be difficult to manufacture. Alternatively you could use a lightweight plastic but note that even 'light' plastic tends to get quite heavy!
 
+## Joining the slices together
+
+To join the slices together, we used [threaded nylon guide rods](https://www.unitedfasteners.com.au/products/fasteners-fixings/nylon/threaded-rod/nylon-threaded-rod), [washers](https://www.unitedfasteners.com.au/products/fasteners-fixings/nylon/washers/nylon-flat-round-standard-washer) and [nuts](https://www.unitedfasteners.com.au/products/fasteners-fixings/nylon/nuts/nylon-wing-nut). One could also imagine for instance a specialized 'slice holder' like a box that all the slices could slot into, but we did not explore this. 
+
 ## Before your first prototype: general tips
 
 - Getting the holes the right size for the markers can involve some trial and error. It's a good idea to build a few single slice prototypes before continuing to a full design. 
