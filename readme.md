@@ -2,7 +2,7 @@
 
 
 
-This repository contains code to generate a customized MRI Distortion Phantom in [FreeCAD](https://www.freecadweb.org/). We also provide a 'how to' on manufacturing and imaging such a phantom in [our documentation](https://acrf-image-x-institute.github.io/MRI_DistortionPhantom/)
+This repository contains code to generate a customized MRI Distortion Phantom in [FreeCAD](https://www.freecadweb.org/). We also provide a 'how to' on manufacturing and imaging such a phantom in [our documentation](https://acrf-image-x-institute.github.io/MRI_DistortionPhantom/). For analysis of the phantom images, please see [this repository](https://github.com/ACRF-Image-X-Institute/MRI_DistortionQA)
 
 Compared to other MRI distortion phantoms, this is:
 
