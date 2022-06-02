@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code documentation &mdash; MRI_DistortionPhantom  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Phantom Imaging" href="phantom_imaging.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> MRI_DistortionPhantom
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="phantom_customisation.html">Phantom Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="phantom_construction.html">Phantom Construction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="phantom_imaging.html">Phantom Imaging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MRI_DistortionPhantom</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Code documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/code_docs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="code-documentation">
+<h1>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this heading"></a></h1>
+<p>The following documentation is generated directly from the source code.
+It should enable an overview of the different options which are available for
+different optimisers.</p>
+<span class="target" id="module-PhantomBuilder"></span><dl class="py class">
+<dt class="sig sig-object py" id="PhantomBuilder.AddPhantomSlice">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">PhantomBuilder.</span></span><span class="sig-name descname"><span class="pre">AddPhantomSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slice_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rectangle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HVL_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HVL_Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hole_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">17</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hole_spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hole_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hole_stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GridOffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HoleCentroids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cartesian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DSV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LoadRegion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ReferenceCrosshairRadius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GuideRods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hole_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhantomBuilder.AddPhantomSlice" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Draws a single slice of the phantom
+All dimensions in mm
+All inputs are optional; calling without defining will just use default value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slice_shape</strong> (<em>string</em>) – Shape of base slice. Currently can only be ‘rectangle’ but others could be added.</p></li>
+<li><p><strong>slice_thickness</strong> (<em>float</em>) – Thickness of slice in Z</p></li>
+<li><p><strong>HVL_x</strong> (<em>float</em>) – Half value of slice in X (Left/Right). For elipse this is equivalent to major radius</p></li>
+<li><p><strong>HVL_Y</strong> (<em>float</em>) – Half value of slice in Y (Up/Down). For elipse this is equivalent to major radius</p></li>
+<li><p><strong>hole_depth</strong> (<em>float</em>) – Depth of holes. If value is &gt; slice_thickness will cut completely through</p></li>
+<li><p><strong>hole_spacing</strong> (<em>float</em>) – distance between hole centroids - only approximate, as there are integers involved!</p></li>
+<li><p><strong>hole_radius</strong> (<em>float</em>) – Radius of holes</p></li>
+<li><p><strong>hole_start</strong> (<em>None</em><em> or </em><em>float</em>) – x/y coordinate to start holes at. Default is None, which will try and choose a sensible value.</p></li>
+<li><p><strong>hole_stop</strong> (<em>None</em><em> or </em><em>float</em>) – x/y coordinate to stop holes at. Default is None, which will try and choose a sensible value.</p></li>
+<li><p><strong>GridOffset</strong> (<em>float</em>) – move the entire hole distrubution by this much. Allows for offset distributions in differenct
+slices</p></li>
+<li><p><strong>HoleCentroids</strong> (<em>string</em><em> (</em><em>'cartesian'</em><em> or </em><em>'ROI_polar'</em><em>) or </em><em>2D list/numpy array</em>) – ‘cartesian’ or ‘ROI_polar’ will produce either cartesian or polar grids based on hole_spacing.
+User can instead specify the location of all hole centroids as a 2D list of X/Y points
+e.g. [[x1,x2,x3],[y1,y2,y3]]. The value of GridOffset will be applied to these points. If user values are entered,
+hole_stop and hole_start are ignored.</p></li>
+<li><p><strong>z_pos</strong> (<em>float</em>) – z position of the middle of the hole cutout.</p></li>
+<li><p><strong>DSV</strong> (<em>None</em><em> or </em><em>float</em>) – Circles representing this raddi at a given z value will be etched on each slice; if you choose ROI_polar
+for marker positions, the code will attempt to ensure good coverage over the DSV surface`</p></li>
+<li><p><strong>LoadRegion</strong> (<em>None</em><em> or </em><em>Dict</em>) – Can specify a cylindrical or spherical load region which will be cut away
+geom each slice, e.g.
+| LoadRegion = {‘shape’: ‘cylinder’, ‘radius’: 100, ‘height’: 200} or,
+| LoadRegion = {‘shape’: ‘sphere’, ‘radius’: 100} (this is not well tested), or
+| LoadRegion={‘shape’: ‘rectangle’, ‘width’: 70, ‘height’: 200}, or
+| LoadRegion = None (default)
+| You can can also optionally add a key z_offset to move the load position along the z axis</p></li>
+<li><p><strong>GuideRods</strong> (<em>None</em><em> or </em><em>Dict</em>) – Adds one guide rod in each corner. Position is distance from edge.
+GuideRods = {‘radius’: 10, ‘position’: 20,’length’: 350}
+See: <a class="reference external" href="https://www.essentracomponents.com/en-au/p/fully-threaded-studs-rods/0060110000vr">https://www.essentracomponents.com/en-au/p/fully-threaded-studs-rods/0060110000vr</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="PhantomBuilder.AddPhantomSlice.add_full_scale_drawing">
+<span class="sig-name descname"><span class="pre">add_full_scale_drawing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhantomBuilder.AddPhantomSlice.add_full_scale_drawing" title="Permalink to this definition"></a></dt>
+<dd><p>Add a basic drawing of the phantom that can be printed off and used to manually drill the holes</p>
+<p>ToDo:: Figure out which paper size needs to be used depending on phantom size</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="PhantomBuilder.AddPhantomSlice.draw_DSV">
+<span class="sig-name descname"><span class="pre">draw_DSV</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhantomBuilder.AddPhantomSlice.draw_DSV" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="PhantomBuilder.AddPhantomSlice.draw_Guide">
+<span class="sig-name descname"><span class="pre">draw_Guide</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhantomBuilder.AddPhantomSlice.draw_Guide" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="PhantomBuilder.AddPhantomSlice.draw_Load">
+<span class="sig-name descname"><span class="pre">draw_Load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhantomBuilder.AddPhantomSlice.draw_Load" title="Permalink to this definition"></a></dt>
+<dd><p>Draw the load. To assist in visualisation.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="phantom_imaging.html" class="btn btn-neutral float-left" title="Phantom Imaging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Brendan Whelan(s).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
