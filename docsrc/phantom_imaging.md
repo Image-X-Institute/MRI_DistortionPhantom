@@ -49,15 +49,7 @@ If this all makes your head hurt as much as it does mine, you have two options:
 ![](_resources/PhaseDirection.jpg)
 **Figure: this is the screen where you can reverse the phase encoding direction in the Siemens software. In the siemens software, reversing the phase encoding direction also reverses the read out (frequency) direction.**
 
-## Gradient Echo sequences
 
-The gradient echo sequence family will exhibit increased more sensitivity to B0 inhomogeneity than Spin Echo sequences. Therefore, if you are trying to separate B0/ Gradient effects this can be a good sequence to utilize. It is also normally faster than spin echo. On the other hand, it will tend to have lower SNR. 
-
-## Spin Echo sequences
-
-The spin echo sequence family are not as sensitive to B0 as gradient echo. They are slower to run, but often exhibit better SNR, especially if your B0 homogeneity is not great. If you are not interested in quantifying B0, then using this sequence with a  high bandwidth is a good choice. 
-
-## Bandwidth
 
 
 
