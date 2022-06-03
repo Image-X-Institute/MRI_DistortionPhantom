@@ -3,17 +3,17 @@ import importlib
 import numpy as np
 import sys
 
-path_to_source = Path(__file__).parent / 'PhantomBuilder'
+path_to_source = Path(__file__).parent
 sys.path.insert(0, str(path_to_source))
 importlib.invalidate_caches()  # maybe is not needed
 import PhantomBuilder  # note the slightly clumsy import; we have to do it like this so FreeCAD finds the module
 importlib.reload(PhantomBuilder)
 
-
 '''
 This demonstrates a script to build a multisclice phantom in FreeCAD.
 This script MUST be called from FreeCAD, it will not run when called directly.
 '''
+
 Nslices = 9  # make this an odd number to make sure you have a slize at z=0
 # the mean z position of the markers (defined by hole_depth) will define the Zposition
 SliceZPositions = np.linspace(-140, 140, Nslices)

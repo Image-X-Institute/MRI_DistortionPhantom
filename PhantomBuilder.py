@@ -94,9 +94,9 @@ class AddPhantomSlice:
         self.slice_thickness = slice_thickness
         self.GridOffset = GridOffset
         self.HoleCentroids = HoleCentroids
-        
+
         self.GuideRods = GuideRods
-        
+
         if self.DSV:  # nb none evaluates to false
             # calculate the intersection of the DSV with this slice location.
             self._roi_on_surface = self.DSV - abs(self.z_pos - self.hole_depth / 2)
@@ -182,7 +182,7 @@ class AddPhantomSlice:
         Figure out where to start drawing the holes. If load region is none it's zero, otherwise need to ensure
         no overlap
         """
-        
+
         # Hole start position with load region
         if self.LoadRegion is None:
             start_load = 0
@@ -199,12 +199,12 @@ class AddPhantomSlice:
                 start_load = np.sqrt(2 * ((self.LoadRegion['width'] / 2) ** 2)) + 10
             else:
                 start_load = 0
-                
+
         # Hole start position with reference crosshair
         start_crosshair = 0
         if self.ReferenceCrosshairRadius is not None:
             start_crosshair = self.ReferenceCrosshairRadius + 10
-            
+
         # Use whichever if larger
         if start_crosshair > start_load:
             self.hole_start = start_crosshair
@@ -419,23 +419,23 @@ class AddPhantomSlice:
         """
         Adds a crosshair shape to a slice up the input size
         """
-        
+
         ReferenceX = []
         ReferenceY = []
-        
+
         # Add central marker
         ReferenceX.append(0)
         ReferenceY.append(0)
 
         # Add crosshairs markers, starting from center outwards
         r = self.hole_spacing
-        
+
         # If the input size is too small, make it so that there is at least one iteration
         if self.ReferenceCrosshairRadius < r:
             self.ReferenceCrosshairRadius = r
-        
+
         while r <= self.ReferenceCrosshairRadius:
-            # +x   
+            # +x
             ReferenceX.append(r)
             ReferenceY.append(0)
             # -x
@@ -444,12 +444,12 @@ class AddPhantomSlice:
             # +y
             ReferenceX.append(0)
             ReferenceY.append(r)
-            # -y      
+            # -y
             ReferenceX.append(0)
             ReferenceY.append(-r)
 
             r += self.hole_spacing
-                
+
         self.ReferenceCentroids = [ReferenceX, ReferenceY]
         try:
             self.HoleCentroids[0].extend(ReferenceX)
@@ -531,7 +531,7 @@ class AddPhantomSlice:
         """
         Use locations defined in HoleCentroids to drill holes
         """
-        
+
         if hole_position_list == None:
             hole_position_list = self.HoleCentroids
 
@@ -562,3 +562,4 @@ class AddPhantomSlice:
         self.ArrayCut = ArrayCut
         ArrayCut.ViewObject.ShapeColor = (0.4, 0.5, 0.3, 1.0)
         self.SliceBase = self.ArrayCut
+
