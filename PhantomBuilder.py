@@ -59,6 +59,9 @@ class AddPhantomSlice:
         GuideRods = {'radius': 10, 'position': 20,'length': 350}
         See: https://www.essentracomponents.com/en-au/p/fully-threaded-studs-rods/0060110000vr
     :type GuideRods: None or Dict
+    :param ReferenceCrosshairRadius: if not None, a crosshair of markers will be drawn inside ReferenceCrosshairRadius.
+        Other markers will not be added in this region.
+    :type ReferenceCrosshairRadius: float
     """
 
     def __init__(self, slice_shape='rectangle', slice_thickness=30, HVL_x=250, HVL_Y=250, z_pos=0, hole_depth=17,
