@@ -13,10 +13,12 @@ importlib.reload(PhantomBuilder)
 '''
 This is the script which I used to generate a design which was sent to Evolution Gear
 '''
-Nslices = 13 # make this an odd number to make sure you have a slize at z=0
-SliceZPositions = np.linspace(-180, 180, Nslices)
+Nslices = 11 # make this an odd number to make sure you have a slize at z=0
+SliceZPositions = np.linspace(-150, 150, Nslices)
+SliceThickness = np.mean(np.abs(np.diff(SliceZPositions)))
 
 for i, z_pos in enumerate(SliceZPositions):
+    # setup load:
     if not int(z_pos) == 0 and (abs(z_pos) < 120):
         '''
         vasline size:
@@ -24,25 +26,32 @@ for i, z_pos in enumerate(SliceZPositions):
         - 10 cm wide
         - 10.5 cm high
         '''
-        load = {'shape': 'rectangle', 'width': 105, 'height': 500}
+        load = {'shape': 'rectangle', 'width': 110, 'height': 510}
     else:
         load = None
-
+    # set up crosshair
     if int(z_pos) == 0:
         print(f'z_pos={z_pos}; dong!')
         referenceRadius = 70
     else:
         referenceRadius = None
+    # set up end slices:
+    if abs(int(z_pos)) == 150:
+        HoleStart = 0
+    else:
+        HoleStart = None
 
     Slice = PhantomBuilder.AddPhantomSlice(slice_shape='rectangle',
-                                           slice_thickness=30, HVL_x=390 / 2, HVL_Y=390 / 2,
+                                           slice_thickness=SliceThickness, HVL_x=390 / 2, HVL_Y=390 / 2,
                                            hole_depth=15, hole_spacing=25,
                                            hole_radius=8.7 / 2,
-                                           DSV=180, z_pos=z_pos,
+                                           DSV=150, z_pos=z_pos,
                                            LoadRegion=load,
                                            GuideRods={'radius': 5, 'position': 20, 'height': 370},
                                            HoleCentroids='ROI_polar',
-                                           ReferenceCrosshairRadius=referenceRadius)
+                                           ReferenceCrosshairRadius=referenceRadius,
+                                           bottom_cut=30,
+                                           hole_start=HoleStart)
 
     z_array = np.ones(np.shape(Slice.HoleCentroids)[1]) * z_pos
     marker_positions_temp = np.vstack([np.array(Slice.HoleCentroids), z_array])
@@ -51,8 +60,9 @@ for i, z_pos in enumerate(SliceZPositions):
     except NameError:
         marker_positions = marker_positions_temp
 
+
 Slice.draw_DSV()
-Slice.draw_Guide()
+# Slice.draw_Guide()
 
 marker_positions = np.array(marker_positions)
 np.savetxt(r'C:\Users\Brendan\Documents\python\MRI_DistortionPhantom\marker_positions.txt', marker_positions)
