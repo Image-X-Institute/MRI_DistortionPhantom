@@ -52,6 +52,7 @@ for i, z_pos in enumerate(SliceZPositions):
                                            ReferenceCrosshairRadius=referenceRadius,
                                            bottom_cut=30,
                                            hole_start=HoleStart)
+    Slice.add_full_scale_drawing()
 
     z_array = np.ones(np.shape(Slice.HoleCentroids)[1]) * z_pos
     marker_positions_temp = np.vstack([np.array(Slice.HoleCentroids), z_array])
@@ -62,7 +63,7 @@ for i, z_pos in enumerate(SliceZPositions):
 
 
 Slice.draw_DSV()
-# Slice.draw_Guide()
+Slice.draw_Guide()
 
 marker_positions = np.array(marker_positions)
 np.savetxt(r'C:\Users\Brendan\Documents\python\MRI_DistortionPhantom\marker_positions.txt', marker_positions)
