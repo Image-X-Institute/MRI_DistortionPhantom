@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 
 import Draft  # note when this is run through FreeCAD, these libraries will already be available
 import numpy as np
@@ -59,15 +60,22 @@ class AddPhantomSlice:
         GuideRods = {'radius': 10, 'position': 20,'length': 350}
         See: https://www.essentracomponents.com/en-au/p/fully-threaded-studs-rods/0060110000vr
     :type GuideRods: None or Dict
+    :param ReferenceCrosshairRadius: if not None, a crosshair of markers will be drawn inside ReferenceCrosshairRadius.
+        Other markers will not be added in this region.
+    :type ReferenceCrosshairRadius: float
+    :param bottom_cut: this cuts away the bottom of the slice. Since MRI scanners often have limits on how low the
+        bed can go, it can be useful to lower the phantom as much as possible.
+    :type bottom_cut: float
     """
 
     def __init__(self, slice_shape='rectangle', slice_thickness=30, HVL_x=250, HVL_Y=250, z_pos=0, hole_depth=17,
                  hole_spacing=25,
-                 hole_radius=8.7 / 2, hole_stop=None, GridOffset=0, HoleCentroids='cartesian', DSV=150,
+                 hole_radius=8.7/2, hole_stop=None, GridOffset=0, HoleCentroids='cartesian', DSV=150,
                  LoadRegion=None,
                  ReferenceCrosshairRadius = None,
                  GuideRods=None,
-                 hole_start=None):
+                 hole_start=None,
+                 bottom_cut=0):
 
         self.DSV = DSV
         self.slice_shape = slice_shape
@@ -83,6 +91,7 @@ class AddPhantomSlice:
         self.ReferenceCrosshairRadius = ReferenceCrosshairRadius
         self._n_markers_on_dsv = None
         self._n_markers = 0
+        self.bottom_cut = bottom_cut
         if hole_stop is None:
             self._calculate_hole_stop()
         else:
@@ -94,9 +103,9 @@ class AddPhantomSlice:
         self.slice_thickness = slice_thickness
         self.GridOffset = GridOffset
         self.HoleCentroids = HoleCentroids
-        
+
         self.GuideRods = GuideRods
-        
+
         if self.DSV:  # nb none evaluates to false
             # calculate the intersection of the DSV with this slice location.
             self._roi_on_surface = self.DSV - abs(self.z_pos - self.hole_depth / 2)
@@ -104,6 +113,7 @@ class AddPhantomSlice:
             self._roi_radius_surface = np.sqrt((2 * self._roi_on_surface * self.DSV) - (self._roi_on_surface ** 2))
             self._roi_radius_center = np.sqrt(
                 (2 * self._roi_on_marker_center * self.DSV) - (self._roi_on_marker_center ** 2))
+
 
 
         if HoleCentroids == 'ROI_polar':
@@ -125,64 +135,11 @@ class AddPhantomSlice:
         doc.recompute()
         FreeCAD.Gui.SendMsgToActiveView("ViewFit")
 
-    def draw_DSV(self):
-        """
-
-        """
-        DSV = doc.addObject("Part::Sphere", "DSV")
-        DSV.Radius = self.DSV
-        DSV.ViewObject.ShapeColor = (0.05, 0.01, 0.0)
-        DSV.ViewObject.Transparency = 80
-
-    def draw_Load(self):
-        """
-        Draw the load. To assist in visualisation.
-        """
-        if self.LoadRegion is not None:
-
-            if self.LoadRegion['shape'].lower() == 'cylinder':
-                Load = doc.addObject("Part::Cylinder", "LoadRegion")
-                Load.Radius = self.LoadRegion['radius']
-                Load.Height = self.LoadRegion['height']
-                Zpos = -1 * self.LoadRegion['height'] / 2  # centered
-                Load.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, Zpos),
-                                                   FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                                   FreeCAD.Vector(0, 0, 0))
-                Load.ViewObject.ShapeColor = (.3, .2, .7, 1.0)
-            elif self.LoadRegion['shape'].lower() == 'sphere':
-                Load = doc.addObject("Part::Sphere", "LoadRegion")
-                Load.Radius = self.LoadRegion['radius']
-                Load.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, 0),
-                                                   FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                                   FreeCAD.Vector(0, 0, 0))
-                Load.ViewObject.ShapeColor = (.3, .2, .7, 1.0)
-
-        else:
-            print(f'You tried to draw a load region, but no load is specified!')
-
-    def draw_Guide(self):
-        Guide = doc.addObject("Part::Cylinder", "Guide")
-        Guide.Radius = self.GuideRods['radius']
-        Guide.Height = self.GuideRods['height']
-
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = self.HVL_x - self.GuideRods['position']
-        Ypos = self.HVL_x - self.GuideRods['position']
-        Guide.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-
-        # mirror the rods
-        Guide = Draft.make_polar_array(Guide, number=4, angle=360.0, center=FreeCAD.Vector(0.0, 0.0, 0.0),
-                                       use_link=True)
-        Guide.Label = 'GuideRods'
-
     def _calculate_hole_start(self):
         """
         Figure out where to start drawing the holes. If load region is none it's zero, otherwise need to ensure
         no overlap
         """
-        
         # Hole start position with load region
         if self.LoadRegion is None:
             start_load = 0
@@ -199,12 +156,12 @@ class AddPhantomSlice:
                 start_load = np.sqrt(2 * ((self.LoadRegion['width'] / 2) ** 2)) + 10
             else:
                 start_load = 0
-                
+
         # Hole start position with reference crosshair
         start_crosshair = 0
         if self.ReferenceCrosshairRadius is not None:
             start_crosshair = self.ReferenceCrosshairRadius + 10
-            
+
         # Use whichever if larger
         if start_crosshair > start_load:
             self.hole_start = start_crosshair
@@ -216,30 +173,8 @@ class AddPhantomSlice:
         try and figure out how where to stop drilling the holes
         """
         stop = np.min([self.HVL_x, self.HVL_Y])
-        stop = stop - self.hole_spacing / 3
+        stop = stop - 10 - self.hole_radius
         self.hole_stop = stop
-
-    def add_full_scale_drawing(self):
-        """
-        Add a basic drawing of the phantom that can be printed off and used to manually drill the holes
-
-        ToDo:: Figure out which paper size needs to be used depending on phantom size
-        """
-
-        Page = doc.addObject('TechDraw::DrawPage', 'RealScaleDrawing')
-        doc.addObject('TechDraw::DrawSVGTemplate', 'Template')
-        this_directory = Path(__file__).parent
-        doc.Template.Template = str(this_directory / "docsrc/_resources/A2_Landscape_blank.svg")
-        Page.Template = doc.Template
-
-        View = doc.addObject('TechDraw::DrawViewPart', 'View')
-        Page.addView(View)
-        View.Direction = FreeCAD.Vector(0.000, 0.000, -1.000)
-        View.Source = [self.ArrayCut]
-        View.Scale = 1.0
-        View.ViewObject.ArcCenterMarks = True
-        View.ViewObject.CenterScale = 3.5
-        View.recompute()
 
     def _check_input_data(self):
         """
@@ -252,6 +187,8 @@ class AddPhantomSlice:
         if self.LoadRegion is not None:
             assert (self.LoadRegion['shape'] == 'sphere') or (self.LoadRegion['shape'] == 'cylinder') \
                    or (self.LoadRegion['shape'] == 'rectangle')
+
+        assert self.bottom_cut >= 0
 
     def _draw_slice_rectangle(self):
 
@@ -310,7 +247,6 @@ class AddPhantomSlice:
 
         # add in an etch to indicate radii of interest
         if self.DSV:
-
             if self._roi_on_marker_center > 0:
                 a = np.sqrt((2 * self._roi_on_marker_center * self.DSV) - (self._roi_on_marker_center ** 2))
                 OuterCyl = doc.addObject("Part::Cylinder", "Cylinder")
@@ -336,29 +272,83 @@ class AddPhantomSlice:
         if (self.LoadRegion is not None) and (self.ReferenceCrosshairRadius is None):
             self._cut_away_load_region()
 
+        if self.bottom_cut > 0:
+            self._cut_away_bottom_of_slice()
+
         if self.GuideRods is not None:
             self._cut_away_guide_rods()
 
-    def _cut_away_guide_rods(self):
-        Guide = doc.addObject("Part::Cylinder", "Guide")
-        Guide.Radius = self.GuideRods['radius']
-        Guide.Height = self.GuideRods['height']
+    def _cut_away_bottom_of_slice(self):
 
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = self.HVL_x - self.GuideRods['position']
-        Ypos = self.HVL_x - self.GuideRods['position']
-        Guide.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-
-        # mirror the rods
-        Guide = Draft.make_polar_array(Guide, number=4, angle=360.0, center=FreeCAD.Vector(0.0, 0.0, 0.0),
-                                       use_link=True)
+        Bottom_Cut = doc.addObject("Part::Box", "Bottom_Cut")
+        Bottom_Cut.Length = self.HVL_x * 2
+        Bottom_Cut.Width = self.HVL_Y * 2
+        Bottom_Cut.Height = self.slice_thickness
+        Bottom_Cut.Placement = FreeCAD.Placement(FreeCAD.Vector(-self.HVL_x, -3*self.HVL_Y + self.bottom_cut, 0),
+                                                FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                                FreeCAD.Vector(0, 0, 0))
 
         CutSlice = doc.addObject("Part::Cut", "Cut")
         CutSlice.Base = self.SliceBase
-        CutSlice.Tool = Guide
+        CutSlice.Tool = Bottom_Cut
 
+        self.SliceBase = CutSlice
+
+    def _cut_away_guide_rods(self):
+
+        # top right
+        Guide_tl = doc.addObject("Part::Cylinder", "Guide_TL")
+        Guide_tl.Radius = self.GuideRods['radius']
+        Guide_tl.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = self.HVL_x - self.GuideRods['position']
+        Ypos = self.HVL_Y - self.GuideRods['position']
+        Guide_tl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # top left
+        Guide_tr = doc.addObject("Part::Cylinder", "Guide_TR")
+        Guide_tr.Radius = self.GuideRods['radius']
+        Guide_tr.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = -self.HVL_x + self.GuideRods['position']
+        Ypos = self.HVL_Y - self.GuideRods['position']
+        Guide_tr.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # bottom right
+        Guide_br = doc.addObject("Part::Cylinder", "Guide_BR")
+        Guide_br.Radius = self.GuideRods['radius']
+        Guide_br.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = self.HVL_x - self.GuideRods['position']
+        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
+        Guide_br.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+
+        # bottom left
+        Guide_bl = doc.addObject("Part::Cylinder", "Guide_BL")
+        Guide_bl.Radius = self.GuideRods['radius']
+        Guide_bl.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = -self.HVL_x + self.GuideRods['position']
+        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
+        Guide_bl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # combine
+        combined_rods = doc.addObject("Part::Compound", "combined_guides")
+        combined_rods.Links = [Guide_tl, Guide_tr, Guide_br, Guide_bl]
+        # boolean
+        CutSlice = doc.addObject("Part::Cut", "Cut")
+        CutSlice.Base = self.SliceBase
+        CutSlice.Tool = combined_rods
+        #
         self.SliceBase = CutSlice
 
     def _cut_away_load_region(self):
@@ -419,23 +409,23 @@ class AddPhantomSlice:
         """
         Adds a crosshair shape to a slice up the input size
         """
-        
+
         ReferenceX = []
         ReferenceY = []
-        
+
         # Add central marker
         ReferenceX.append(0)
         ReferenceY.append(0)
 
         # Add crosshairs markers, starting from center outwards
         r = self.hole_spacing
-        
+
         # If the input size is too small, make it so that there is at least one iteration
         if self.ReferenceCrosshairRadius < r:
             self.ReferenceCrosshairRadius = r
-        
+
         while r <= self.ReferenceCrosshairRadius:
-            # +x   
+            # +x
             ReferenceX.append(r)
             ReferenceY.append(0)
             # -x
@@ -444,12 +434,12 @@ class AddPhantomSlice:
             # +y
             ReferenceX.append(0)
             ReferenceY.append(r)
-            # -y      
+            # -y
             ReferenceX.append(0)
             ReferenceY.append(-r)
 
             r += self.hole_spacing
-                
+
         self.ReferenceCentroids = [ReferenceX, ReferenceY]
         try:
             self.HoleCentroids[0].extend(ReferenceX)
@@ -481,7 +471,7 @@ class AddPhantomSlice:
             RadialCoordinates = RadialCoordinates + offset
         # delete any outside hole_start / stop
         RadialCoordinates = RadialCoordinates[
-            np.logical_and(RadialCoordinates > self.hole_start, RadialCoordinates < self.hole_stop)]
+            np.logical_and(RadialCoordinates >= self.hole_start, RadialCoordinates <= self.hole_stop)]
         for r in RadialCoordinates:
             circumference = 2 * np.pi * r
             Nmarkers = int((circumference / self.hole_spacing) + 0.5)
@@ -495,6 +485,10 @@ class AddPhantomSlice:
                     print(f'what the devil! {Nmarkers}')
                 x = r * np.cos(theta)
                 y = r * np.sin(theta)
+                if self.bottom_cut > 0:
+                    remove_ind = y > -self.HVL_Y + self.bottom_cut + self.hole_radius + 10
+                    x = np.array(x)[remove_ind]
+                    y = np.array(y)[remove_ind]
                 self._n_markers = self._n_markers + len(x)
                 if abs(r - self._roi_radius_center) < 2:
                     self._n_markers_on_dsv = len(x)
@@ -508,6 +502,8 @@ class AddPhantomSlice:
 
     def _generate_cartesian_hole_positions(self):
 
+        if self.bottom_cut:
+            warnings.warn('havent coded cartesian holes with bottom_cut')
         NholesY = round((((self.hole_stop)) - self.hole_spacing) / self.hole_spacing)
         NHolesX = round((((self.hole_stop)) - self.hole_spacing) / self.hole_spacing)
         x_half = np.linspace(0, self.hole_stop, NHolesX)
@@ -520,6 +516,7 @@ class AddPhantomSlice:
         ind_remove_less_than_x = abs(AllX) < self.hole_start
         ind_remove_less_than_y = abs(AllY) < self.hole_start
         ind_remove = np.logical_and(ind_remove_less_than_y, ind_remove_less_than_x)
+
         # ind_remove_more_than= np.logical_and(abs(AllX) > self.hole_stop, abs(AllY) > self.hole_stop)
         # ind_remove = np.logical_or(ind_remove_more_than, ind_remove_less_than)
         AllX = AllX[np.logical_not(ind_remove)]
@@ -530,8 +527,12 @@ class AddPhantomSlice:
     def _drill_holes(self, hole_position_list=None):
         """
         Use locations defined in HoleCentroids to drill holes
+
+        :param hole_position_list: a list of hole positions can be passed, which will be used instead of self.HoleCentroids.
+            This is mainly to enable this method to be easily recycled.
+        :type hole_position_list: list, optional
         """
-        
+
         if hole_position_list == None:
             hole_position_list = self.HoleCentroids
 
@@ -562,3 +563,112 @@ class AddPhantomSlice:
         self.ArrayCut = ArrayCut
         ArrayCut.ViewObject.ShapeColor = (0.4, 0.5, 0.3, 1.0)
         self.SliceBase = self.ArrayCut
+
+    # public methods
+
+    def add_full_scale_drawing(self):
+        """
+        Add a basic drawing of the phantom that can be printed off and used to manually drill the holes
+
+        ToDo:: Figure out which paper size needs to be used depending on phantom size
+        """
+        Name = f'slice_{self.z_pos}_drawing'
+        Page = doc.addObject('TechDraw::DrawPage', Name)
+        doc.addObject('TechDraw::DrawSVGTemplate', 'Template')
+        this_directory = Path(__file__).parent
+        doc.Template.Template = str(this_directory / "docsrc/_resources/A2_Landscape_blank.svg")
+        Page.Template = doc.Template
+
+        View = doc.addObject('TechDraw::DrawViewPart', 'View')
+        Page.addView(View)
+        View.Direction = FreeCAD.Vector(0.000, 0.000, -1.000)
+        View.Source = [self.ArrayCut]
+        View.Scale = 1.0
+        View.ViewObject.ArcCenterMarks = True
+        View.ViewObject.CenterScale = 3.5
+        View.recompute()
+
+    def draw_DSV(self):
+        """
+
+        """
+        DSV = doc.addObject("Part::Sphere", "DSV")
+        DSV.Radius = self.DSV
+        DSV.ViewObject.ShapeColor = (0.05, 0.01, 0.0)
+        DSV.ViewObject.Transparency = 80
+
+    def draw_Load(self):
+        """
+        Draw the load. To assist in visualisation.
+        """
+        if self.LoadRegion is not None:
+
+            if self.LoadRegion['shape'].lower() == 'cylinder':
+                Load = doc.addObject("Part::Cylinder", "LoadRegion")
+                Load.Radius = self.LoadRegion['radius']
+                Load.Height = self.LoadRegion['height']
+                Zpos = -1 * self.LoadRegion['height'] / 2  # centered
+                Load.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, Zpos),
+                                                   FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                                   FreeCAD.Vector(0, 0, 0))
+                Load.ViewObject.ShapeColor = (.3, .2, .7, 1.0)
+            elif self.LoadRegion['shape'].lower() == 'sphere':
+                Load = doc.addObject("Part::Sphere", "LoadRegion")
+                Load.Radius = self.LoadRegion['radius']
+                Load.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, 0),
+                                                   FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                                   FreeCAD.Vector(0, 0, 0))
+                Load.ViewObject.ShapeColor = (.3, .2, .7, 1.0)
+
+        else:
+            print(f'You tried to draw a load region, but no load is specified!')
+
+    def draw_Guide(self):
+        # top right
+        Guide_tl = doc.addObject("Part::Cylinder", "Guide_TL")
+        Guide_tl.Radius = self.GuideRods['radius']
+        Guide_tl.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = self.HVL_x - self.GuideRods['position']
+        Ypos = self.HVL_Y - self.GuideRods['position']
+        Guide_tl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # top left
+        Guide_tr = doc.addObject("Part::Cylinder", "Guide_TR")
+        Guide_tr.Radius = self.GuideRods['radius']
+        Guide_tr.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = -self.HVL_x + self.GuideRods['position']
+        Ypos = self.HVL_Y - self.GuideRods['position']
+        Guide_tr.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # bottom right
+        Guide_br = doc.addObject("Part::Cylinder", "Guide_BR")
+        Guide_br.Radius = self.GuideRods['radius']
+        Guide_br.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = self.HVL_x - self.GuideRods['position']
+        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
+        Guide_br.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+
+        # bottom left
+        Guide_bl = doc.addObject("Part::Cylinder", "Guide_BL")
+        Guide_bl.Radius = self.GuideRods['radius']
+        Guide_bl.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = -self.HVL_x + self.GuideRods['position']
+        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
+        Guide_bl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+        # combine
+        combined_rods = doc.addObject("Part::Compound", "combined_guides")
+        combined_rods.Links = [doc.Guide_TL, doc.Guide_TR, doc.Guide_BR, doc.Guide_BL]
