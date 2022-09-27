@@ -211,7 +211,10 @@ class AddPhantomSlice:
             self._cut_away_bottom_of_slice()
 
         if self.GuideRods is not None:
-            self._cut_away_guide_rods()
+            if self.slice_shape == 'rectangle':
+                self._cut_away_guide_rods_rectangle()
+            elif self.slice_shape == 'ellipse':
+                self._cut_away_guide_rods_ellipse()
 
     def _add_etches_to_slice_base(self):
         # add in an etch where the center of the marker will sit (half way down the hole)
@@ -321,7 +324,68 @@ class AddPhantomSlice:
 
         self.SliceBase = CutSlice
 
-    def _cut_away_guide_rods(self):
+    def _cut_away_guide_rods_ellipse(self, cut_from_slice=True):
+
+        # a
+        Guide_a = doc.addObject("Part::Cylinder", "Guide_t")
+        Guide_a.Radius = self.GuideRods['radius']
+        Guide_a.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = 0
+        Ypos = self.HVL_Y - self.GuideRods['position']
+        Guide_a.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+
+        # b
+        Guide_b = doc.addObject("Part::Cylinder", "Guide_b")
+        Guide_b.Radius = self.GuideRods['radius']
+        Guide_b.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = self.HVL_x - self.GuideRods['position']
+        Ypos = 0
+        Guide_b.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                            FreeCAD.Vector(0, 0, 0))
+
+        # top
+        Guide_c = doc.addObject("Part::Cylinder", "Guide_c")
+        Guide_c.Radius = self.GuideRods['radius']
+        Guide_c.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = 0
+        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
+        Guide_c.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                              FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                              FreeCAD.Vector(0, 0, 0))
+
+        # d
+        Guide_d = doc.addObject("Part::Cylinder", "Guide_d")
+        Guide_d.Radius = self.GuideRods['radius']
+        Guide_d.Height = self.GuideRods['height']
+
+        Zpos = -1 * self.GuideRods['height'] / 2  # centered
+        Xpos = -self.HVL_x + self.GuideRods['position']
+        Ypos = 0
+        Guide_d.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
+                                              FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                              FreeCAD.Vector(0, 0, 0))
+
+        if cut_from_slice:
+            # combine
+            combined_rods = doc.addObject("Part::Compound", "combined_guides")
+            combined_rods.Links = [Guide_a, Guide_b, Guide_c, Guide_d]
+            # boolean
+            CutSlice = doc.addObject("Part::Cut", "Cut")
+            CutSlice.Base = self.SliceBase
+            CutSlice.Tool = combined_rods
+            #
+            self.SliceBase = CutSlice
+
+    def _cut_away_guide_rods_rectangle(self, cut_from_slice=True):
 
         # top right
         Guide_tl = doc.addObject("Part::Cylinder", "Guide_TL")
@@ -368,15 +432,17 @@ class AddPhantomSlice:
         Guide_bl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
                                             FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
                                             FreeCAD.Vector(0, 0, 0))
-        # combine
-        combined_rods = doc.addObject("Part::Compound", "combined_guides")
-        combined_rods.Links = [Guide_tl, Guide_tr, Guide_br, Guide_bl]
-        # boolean
-        CutSlice = doc.addObject("Part::Cut", "Cut")
-        CutSlice.Base = self.SliceBase
-        CutSlice.Tool = combined_rods
-        #
-        self.SliceBase = CutSlice
+        
+        if cut_from_slice:
+            # combine
+            combined_rods = doc.addObject("Part::Compound", "combined_guides")
+            combined_rods.Links = [Guide_tl, Guide_tr, Guide_br, Guide_bl]
+            # boolean
+            CutSlice = doc.addObject("Part::Cut", "Cut")
+            CutSlice.Base = self.SliceBase
+            CutSlice.Tool = combined_rods
+            #
+            self.SliceBase = CutSlice
 
     def _cut_away_load_region(self):
         """
@@ -664,51 +730,10 @@ class AddPhantomSlice:
             print(f'You tried to draw a load region, but no load is specified!')
 
     def draw_Guide(self):
-        # top right
-        Guide_tl = doc.addObject("Part::Cylinder", "Guide_TL")
-        Guide_tl.Radius = self.GuideRods['radius']
-        Guide_tl.Height = self.GuideRods['height']
-
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = self.HVL_x - self.GuideRods['position']
-        Ypos = self.HVL_Y - self.GuideRods['position']
-        Guide_tl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-        # top left
-        Guide_tr = doc.addObject("Part::Cylinder", "Guide_TR")
-        Guide_tr.Radius = self.GuideRods['radius']
-        Guide_tr.Height = self.GuideRods['height']
-
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = -self.HVL_x + self.GuideRods['position']
-        Ypos = self.HVL_Y - self.GuideRods['position']
-        Guide_tr.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-        # bottom right
-        Guide_br = doc.addObject("Part::Cylinder", "Guide_BR")
-        Guide_br.Radius = self.GuideRods['radius']
-        Guide_br.Height = self.GuideRods['height']
-
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = self.HVL_x - self.GuideRods['position']
-        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
-        Guide_br.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-
-        # bottom left
-        Guide_bl = doc.addObject("Part::Cylinder", "Guide_BL")
-        Guide_bl.Radius = self.GuideRods['radius']
-        Guide_bl.Height = self.GuideRods['height']
-
-        Zpos = -1 * self.GuideRods['height'] / 2  # centered
-        Xpos = -self.HVL_x + self.GuideRods['position']
-        Ypos = -self.HVL_Y + self.GuideRods['position'] + self.bottom_cut
-        Guide_bl.Placement = FreeCAD.Placement(FreeCAD.Vector(Xpos, Ypos, Zpos),
-                                            FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                            FreeCAD.Vector(0, 0, 0))
-        # combine
-        combined_rods = doc.addObject("Part::Compound", "combined_guides")
-        combined_rods.Links = [doc.Guide_TL, doc.Guide_TR, doc.Guide_BR, doc.Guide_BL]
+        if self.GuideRods:
+            if self.slice_shape == 'ellipsoid':
+                self._cut_away_guide_rods_ellipse(cut_from_slice=False)
+            if self.slice_shape == 'rectangle':
+                self._cut_away_guide_rods_rectangle(cut_from_slice=False)
+        else:
+            warnings.warn('cannot draw guide rods when they are not defined')
