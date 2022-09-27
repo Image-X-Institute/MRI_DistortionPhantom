@@ -2,12 +2,11 @@ from pathlib import Path
 import importlib
 import numpy as np
 import sys
-
-
-path_to_source = Path(__file__).parent
+path_to_source = Path(__file__).parent.parent
 sys.path.insert(0, str(path_to_source))
 importlib.invalidate_caches()  # maybe is not needed
-import PhantomBuilder  # note the slightly clumsy import; we have to do it like this so FreeCAD finds the module
+from PhantomDesign import PhantomBuilder
+
 importlib.reload(PhantomBuilder)
 
 '''

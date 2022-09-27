@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 import warnings
-
+from itertools import compress
 import Draft  # note when this is run through FreeCAD, these libraries will already be available
+import Part
 import numpy as np
 from pathlib import Path
 import FreeCAD
@@ -21,9 +23,9 @@ class AddPhantomSlice:
     :type slice_shape: string
     :param slice_thickness: Thickness of slice in Z
     :type slice_thickness: float
-    :param HVL_x: Half value of slice in X (Left/Right). For elipse this is equivalent to major radius
+    :param HVL_x: Half value of slice in X (Left/Right). For ellipse this is equivalent to major radius
     :type HVL_x: float
-    :param HVL_Y: Half value of slice in Y (Up/Down). For elipse this is equivalent to major radius
+    :param HVL_Y: Half value of slice in Y (Up/Down). For ellipse this is equivalent to major radius
     :type HVL_Y: float
     :param hole_depth: Depth of holes. If value is > slice_thickness will cut completely through
     :type hole_depth: float
@@ -79,11 +81,9 @@ class AddPhantomSlice:
 
         self.DSV = DSV
         self.slice_shape = slice_shape
-        self.TableOffset = 100  # how far below iso the the table surface?
         self.HVL_x = HVL_x
         self.HVL_Y = HVL_Y
         self.z_pos = z_pos
-        self.elipse_cutoff = self.HVL_Y - self.TableOffset  # this is the correct cut off so the center of the elipse is at isoceneter
         self.hole_spacing = hole_spacing
         self.hole_depth = hole_depth
         self.hole_radius = hole_radius
@@ -122,12 +122,14 @@ class AddPhantomSlice:
             self._generate_cartesian_hole_positions()
         elif not isinstance(HoleCentroids, list) or not isinstance(HoleCentroids, np.ndarray):
             print(f'unknown option for HoleCentroids supplied: type {type(HoleCentroids)}, value: {HoleCentroids}')
+        self._remove_holes_outside_slice()
         self._check_input_data()
         if ReferenceCrosshairRadius is not None:
             self._generate_reference_crosshair()
 
         # Methods:
-        self._draw_slice_rectangle()
+        self._draw_slice_base()
+
         self._drill_holes()
 
         # update geometry and view:
@@ -190,16 +192,28 @@ class AddPhantomSlice:
 
         assert self.bottom_cut >= 0
 
-    def _draw_slice_rectangle(self):
+    def _draw_slice_base(self):
+        if self.slice_shape.lower() == 'rectangle':
+            self._draw_slice_rectangle()
+        elif self.slice_shape == 'ellipse':
+            self._draw_slice_ellipse()
+        else:
+            raise AttributeError(f'No method defined for slice_shape {self.slice_shape}')
 
-        SliceBase = doc.addObject("Part::Box", "Box")
-        SliceBase.Length = self.HVL_x * 2
-        SliceBase.Width = self.HVL_Y * 2
-        SliceBase.Height = self.slice_thickness
-        SliceBase.Placement = FreeCAD.Placement(FreeCAD.Vector(-self.HVL_x, -self.HVL_Y, 0),
-                                                FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
-                                                FreeCAD.Vector(0, 0, 0))
+        self._add_etches_to_slice_base()
+        if self.DSV and self._roi_on_marker_center:
+            self._add_ROI_etch_to_slice_base()
 
+        if (self.LoadRegion is not None) and (self.ReferenceCrosshairRadius is None):
+            self._cut_away_load_region()
+
+        if self.bottom_cut > 0:
+            self._cut_away_bottom_of_slice()
+
+        if self.GuideRods is not None:
+            self._cut_away_guide_rods()
+
+    def _add_etches_to_slice_base(self):
         # add in an etch where the center of the marker will sit (half way down the hole)
         OuterEtch = doc.addObject("Part::Box", "Box")
         OuterEtch.Length = self.HVL_x * 2
@@ -224,8 +238,9 @@ class AddPhantomSlice:
 
         # Subtract the etch cut from the slice base
         SliceBase2 = doc.addObject("Part::Cut", "SliceBase")
-        SliceBase2.Base = SliceBase
+        SliceBase2.Base = self.SliceBase
         SliceBase2.Tool = EtchCut
+        self.SliceBase = SliceBase2
 
         # add etches to Z planes
         Z_plane_Etch = doc.addObject("Part::Box", "Box")
@@ -243,40 +258,52 @@ class AddPhantomSlice:
         EtchCut.Base = SliceBase2
         EtchCut.Tool = Z_plane_Etch_mirror
 
-        SliceBase2 = EtchCut
+        self.SliceBase = EtchCut
 
+    def _add_ROI_etch_to_slice_base(self):
+        """
         # add in an etch to indicate radii of interest
-        if self.DSV:
-            if self._roi_on_marker_center > 0:
-                a = np.sqrt((2 * self._roi_on_marker_center * self.DSV) - (self._roi_on_marker_center ** 2))
-                OuterCyl = doc.addObject("Part::Cylinder", "Cylinder")
-                OuterCyl.Radius = a
-                OuterCyl.Height = 1
-                InnerCyl = doc.addObject("Part::Cylinder", "Cylinder")
-                InnerCyl.Radius = a - 1
-                InnerCyl.Height = 1
-                EtchCut2 = doc.addObject("Part::Cut", "SliceBase")
-                EtchCut2.Base = OuterCyl
-                EtchCut2.Tool = InnerCyl
+        """
+        a = np.sqrt((2 * self._roi_on_marker_center * self.DSV) - (self._roi_on_marker_center ** 2))
+        OuterCyl = doc.addObject("Part::Cylinder", "Cylinder")
+        OuterCyl.Radius = a
+        OuterCyl.Height = 1
+        InnerCyl = doc.addObject("Part::Cylinder", "Cylinder")
+        InnerCyl.Radius = a - 1
+        InnerCyl.Height = 1
+        EtchCut2 = doc.addObject("Part::Cut", "SliceBase")
+        EtchCut2.Base = OuterCyl
+        EtchCut2.Tool = InnerCyl
 
-                SliceBase3 = doc.addObject("Part::Cut", "SliceBase")
-                SliceBase3.Base = SliceBase2
-                SliceBase3.Tool = EtchCut2
-                self.SliceBase = SliceBase3  # keep this for drilling holes in
-            else:
-                self.SliceBase = SliceBase2
-        else:
-            self.SliceBase = SliceBase2
+        SliceBase3 = doc.addObject("Part::Cut", "SliceBase")
+        SliceBase3.Base = self.SliceBase
+        SliceBase3.Tool = EtchCut2
+        self.SliceBase = SliceBase3  # keep this for drilling holes in
 
+    def _draw_slice_rectangle(self):
 
-        if (self.LoadRegion is not None) and (self.ReferenceCrosshairRadius is None):
-            self._cut_away_load_region()
+        self.SliceBase = doc.addObject("Part::Box", "Box")
+        self.SliceBase.Length = self.HVL_x * 2
+        self.SliceBase.Width = self.HVL_Y * 2
+        self.SliceBase.Height = self.slice_thickness
+        self.SliceBase.Placement = FreeCAD.Placement(FreeCAD.Vector(-self.HVL_x, -self.HVL_Y, 0),
+                                                FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0),
+                                                FreeCAD.Vector(0, 0, 0))
 
-        if self.bottom_cut > 0:
-            self._cut_away_bottom_of_slice()
+    def _draw_slice_ellipse(self):
 
-        if self.GuideRods is not None:
-            self._cut_away_guide_rods()
+        Body = doc.addObject('PartDesign::Body', 'ellipse')
+
+        Sketch = Body.newObject('Sketcher::SketchObject', 'ellipse_sketch')
+        Sketch.Placement = FreeCAD.Placement(FreeCAD.Vector(0.0, 0.0, 0), FreeCAD.Rotation(0.0, 0.0, 0.0, 1.00))
+        Sketch.addGeometry(
+            Part.Ellipse(FreeCAD.Vector(self.HVL_x, 0, 0), FreeCAD.Vector(0, self.HVL_Y, 0), FreeCAD.Vector(0, 0, 0)),
+            False)
+        Sketch.ViewObject.Visibility = False
+        Pad = Body.newObject("PartDesign::Pad", "Pad")
+        Pad.Profile = Sketch
+        Pad.Length = self.slice_thickness
+        self.SliceBase = Pad
 
     def _cut_away_bottom_of_slice(self):
 
@@ -524,6 +551,19 @@ class AddPhantomSlice:
         self._n_markers = len(AllY)
         self.HoleCentroids = [AllX, AllY]
 
+    def _remove_holes_outside_slice(self):
+        """
+        remove any holes which are not entirely inside the slice
+        :return:
+        """
+        if self.slice_shape == 'ellipse':
+            x2 = (abs(np.array(self.HoleCentroids[0])) + self.hole_radius) ** 2
+            y2 = (abs(np.array(self.HoleCentroids[1])) + self.hole_radius) ** 2
+            centroid_in_elipse = (x2 / self.HVL_x ** 2) + (y2 / self.HVL_Y ** 2) < 1
+            self.HoleCentroids = list(np.array(self.HoleCentroids).T[centroid_in_elipse].T)
+            print(f'removing {np.count_nonzero(centroid_in_elipse)}')
+            # ^^ this may be the single worse line of code i've ever written
+
     def _drill_holes(self, hole_position_list=None):
         """
         Use locations defined in HoleCentroids to drill holes
@@ -576,7 +616,7 @@ class AddPhantomSlice:
         Page = doc.addObject('TechDraw::DrawPage', Name)
         doc.addObject('TechDraw::DrawSVGTemplate', 'Template')
         this_directory = Path(__file__).parent
-        doc.Template.Template = str(this_directory / "docsrc/_resources/A2_Landscape_blank.svg")
+        doc.Template.Template = str(this_directory.parent / "docsrc/_resources/A2_Landscape_blank.svg")
         Page.Template = doc.Template
 
         View = doc.addObject('TechDraw::DrawViewPart', 'View')
