@@ -6,7 +6,7 @@ import sys
 path_to_source = Path(__file__).parent.parent
 sys.path.insert(0, str(path_to_source))
 importlib.invalidate_caches()  # maybe is not needed
-from PhantomDesign import PhantomBuilder
+from PhantomDesign import PhantomDesigner
 importlib.reload(PhantomBuilder)
 
 """
