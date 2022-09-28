@@ -42,7 +42,7 @@ for i, z_pos in enumerate(SliceZPositions):
     Slice = PhantomDesigner.PhantomSlice(slice_shape='rectangle',
                                            slice_thickness=SliceThickness, HVL_x=390 / 2, HVL_Y=390 / 2,
                                            hole_depth=17, hole_spacing=25,
-                                           hole_radius=8.7 / 2,
+                                           hole_radius=8.5 / 2,
                                            DSV=150, z_pos=z_pos,
                                            LoadRegion=load,
                                            GuideRods={'radius': 5, 'position': 20, 'height': 370},
