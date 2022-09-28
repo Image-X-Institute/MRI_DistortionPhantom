@@ -25,8 +25,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
       - name: Install dependencies
-        run: python3 -m pip install -r docsrc/build_doc_requirements.txt
-
+        run: python3 -m pip install -r docsrc/build_docs_requirements.txt
       - name: build sphinx docs
         run: |
           cd docsrc
