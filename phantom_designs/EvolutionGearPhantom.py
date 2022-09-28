@@ -7,7 +7,7 @@ sys.path.insert(0, str(path_to_source))
 importlib.invalidate_caches()  # maybe is not needed
 from PhantomDesign import PhantomDesigner
 
-importlib.reload(PhantomBuilder)
+importlib.reload(PhantomDesigner)
 
 '''
 This is the script which I used to generate a design which was sent to Evolution Gear
@@ -18,7 +18,7 @@ SliceThickness = np.mean(np.abs(np.diff(SliceZPositions)))
 
 for i, z_pos in enumerate(SliceZPositions):
     # setup load:
-    if not int(z_pos) == 0 and (abs(z_pos) < 120):
+    if not int(z_pos) == 0 and ((z_pos) < 120) and ((z_pos) > 20):
         '''
         vasline size:
         - 8 cm depth: three slices 
@@ -30,7 +30,6 @@ for i, z_pos in enumerate(SliceZPositions):
         load = None
     # set up crosshair
     if int(z_pos) == 0:
-        print(f'z_pos={z_pos}; dong!')
         referenceRadius = 70
     else:
         referenceRadius = None
@@ -40,9 +39,9 @@ for i, z_pos in enumerate(SliceZPositions):
     else:
         HoleStart = None
 
-    Slice = PhantomBuilder.AddPhantomSlice(slice_shape='rectangle',
+    Slice = PhantomDesigner.PhantomSlice(slice_shape='rectangle',
                                            slice_thickness=SliceThickness, HVL_x=390 / 2, HVL_Y=390 / 2,
-                                           hole_depth=15, hole_spacing=25,
+                                           hole_depth=17, hole_spacing=25,
                                            hole_radius=8.7 / 2,
                                            DSV=150, z_pos=z_pos,
                                            LoadRegion=load,
@@ -51,6 +50,7 @@ for i, z_pos in enumerate(SliceZPositions):
                                            ReferenceCrosshairRadius=referenceRadius,
                                            bottom_cut=30,
                                            hole_start=HoleStart)
+    Slice.draw_slice()
     Slice.add_full_scale_drawing()
 
     z_array = np.ones(np.shape(Slice.HoleCentroids)[1]) * z_pos
@@ -61,17 +61,8 @@ for i, z_pos in enumerate(SliceZPositions):
         marker_positions = marker_positions_temp
 
 
-Slice.draw_DSV()
-Slice.draw_Guide()
+# Slice.draw_DSV()
+# Slice.draw_Guide()
 
 marker_positions = np.array(marker_positions)
-np.savetxt(r'C:\Users\Brendan\Documents\python\MRI_DistortionPhantom\marker_positions.txt', marker_positions)
-
-
-"""
-- adjusted hole size
-- enlarged DSV to 160
-- extended phantom length - will guide rods be long enough?
-- added large load regions for vaseline either side of central slice
-- saved all marker positions to a text file
-"""
+np.savetxt(r'evolution_phantom_marker_positions.txt', marker_positions)

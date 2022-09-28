@@ -7,7 +7,7 @@ path_to_source = Path(__file__).parent.parent
 sys.path.insert(0, str(path_to_source))
 importlib.invalidate_caches()  # maybe is not needed
 from PhantomDesign import PhantomDesigner
-importlib.reload(PhantomBuilder)
+importlib.reload(PhantomDesigner)
 
 """
 This script was set up to demonstrate some of the different phantom designs that can be generated with this code
@@ -18,7 +18,7 @@ Nslices = 1  # just need one slice for demo
 SliceZPositions = 0
 
 if design_to_build == 'elipsoid_cartesian':
-    Slice = PhantomBuilder.AddPhantomSlice(slice_shape='ellipse',
+    Slice = PhantomDesigner.PhantomSlice(slice_shape='ellipse',
                                            slice_thickness=35, HVL_x=200, HVL_Y=160,
                                            hole_depth=17, hole_spacing=20,
                                            hole_radius=8.7 / 2,
@@ -26,11 +26,12 @@ if design_to_build == 'elipsoid_cartesian':
                                            HoleCentroids='cartesian',
                                            DSV=None,
                                            bottom_cut=50)
+    Slice.draw_slice()
     Slice.add_full_scale_drawing()
     Slice.draw_Guide()
 
 elif design_to_build == 'rectangle_polar':
-    Slice = PhantomBuilder.AddPhantomSlice(slice_shape='rectangle',
+    Slice = PhantomDesigner.PhantomSlice(slice_shape='rectangle',
                                            slice_thickness=20, HVL_x=100, HVL_Y=100,
                                            hole_depth=17, hole_spacing=20,
                                            hole_radius=5,
@@ -38,6 +39,7 @@ elif design_to_build == 'rectangle_polar':
                                            HoleCentroids='ROI_polar',
                                            DSV=50,
                                            bottom_cut=0)
+    Slice.draw_slice()
     Slice.add_full_scale_drawing()
 
 elif design_to_build == 'circle_spiral':
@@ -54,7 +56,7 @@ elif design_to_build == 'circle_spiral':
     y_2 = r * np.sin(theta)
     hole_centroids = [x_2, y_2]
 
-    Slice = PhantomBuilder.AddPhantomSlice(slice_shape='ellipse',
+    Slice = PhantomDesigner.PhantomSlice(slice_shape='ellipse',
                                            slice_thickness=35, HVL_x=200, HVL_Y=200,
                                            hole_depth=17, hole_spacing=20,
                                            hole_radius=8.7 / 2,
@@ -62,6 +64,7 @@ elif design_to_build == 'circle_spiral':
                                            HoleCentroids=hole_centroids,
                                            DSV=None,
                                            bottom_cut=0)
+    Slice.draw_slice()
     Slice.add_full_scale_drawing()
 
 else:

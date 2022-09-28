@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-import logging
+
 import warnings
-from itertools import compress
-import Draft  # note when this is run through FreeCAD, these libraries will already be available
-import Part
 import numpy as np
 from pathlib import Path
-import FreeCAD
 import sys
+try:
+    import Draft  # note when this is run through FreeCAD, these libraries will already be available
+    import Part
+    import FreeCAD
+    doc = FreeCAD.newDocument('DistPhantom')  # instantiate doc object
+except ImportError:
+    warnings.warn('failed to import FreeCAD libraries; you should execute your script from within FreeCAD to '
+                  'generate CAD designs. Continuing.')
 
 
-# get the doc object (will happen every time this module gets called)
-doc = FreeCAD.newDocument('DistPhantom')  # instantiate doc object
-
-class AddPhantomSlice:
+class PhantomSlice:
     """
     Draws a single slice of the phantom
     All dimensions in mm
@@ -127,15 +128,7 @@ class AddPhantomSlice:
         if ReferenceCrosshairRadius is not None:
             self._generate_reference_crosshair()
 
-        # Methods:
-        self._draw_slice_base()
 
-        self._drill_holes()
-
-        # update geometry and view:
-        FreeCAD.Gui.ActiveDocument.ActiveView.setAxisCross(True)
-        doc.recompute()
-        FreeCAD.Gui.SendMsgToActiveView("ViewFit")
 
     def _calculate_hole_start(self):
         """
@@ -538,7 +531,7 @@ class AddPhantomSlice:
             self.HoleCentroids[0].extend(ReferenceX)
             self.HoleCentroids[1].extend(ReferenceY)
         except AttributeError:
-            # dont think it should be possible that HoleCentroids dont exist but just in case
+            # dont think it should be possible that HoleCentroids don't exist but just in case
             self.HoleCentroids = []
             self.HoleCentroids.append(ReferenceY)
             self.HoleCentroids.append(ReferenceX)
@@ -590,7 +583,7 @@ class AddPhantomSlice:
         self.HoleCentroids = [AllX, AllY]
         if self._n_markers_on_dsv is None:
             self._n_markers_on_dsv = 0
-            print(f'\n\nNO MARKERS FOUND. roi_radius: {self._roi_radius_center}, all r: {RadialCoordinates},'
+            print(f'NO MARKERS FOUND. roi_radius: {self._roi_radius_center}, all r: {RadialCoordinates},'
                   f'z_pos is {self.z_pos}')
 
     def _generate_cartesian_hole_positions(self):
@@ -671,6 +664,20 @@ class AddPhantomSlice:
         self.SliceBase = self.ArrayCut
 
     # public methods
+
+    def draw_slice(self):
+        """
+        This is the method which actually draws the slice in FreeCAD
+        Prior to calling this method, the code should work without any calls to FreeCAD
+        :return:
+        """
+        # Methods:
+        self._draw_slice_base()
+        self._drill_holes()
+        # update geometry and view:
+        FreeCAD.Gui.ActiveDocument.ActiveView.setAxisCross(True)
+        doc.recompute()
+        FreeCAD.Gui.SendMsgToActiveView("ViewFit")
 
     def add_full_scale_drawing(self):
         """
